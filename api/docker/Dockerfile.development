@@ -1,0 +1,14 @@
+FROM node:latest
+
+RUN mkdir /srv/express-mongo-redis
+WORKDIR /srv/express-mongo-redis
+
+ADD package.json /srv/express-mongo-redis/
+RUN npm install
+
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
+RUN chmod +x /wait
+
+RUN npm install -g nodemon
+
+CMD /wait && nodemon api.js

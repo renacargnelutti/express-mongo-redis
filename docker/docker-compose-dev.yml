@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  server_mongo_database:
+    image: mongo:4.2
+    container_name: server_mongo_database
+    env_file:
+      - ../.env_development
+    volumes:
+      - ./data:/data/db
+    restart: always
+    ports:
+      - "27017:27017"
+
+  server_redis_database:
+    image: redis:latest
+    container_name: server_redis_database
+    env_file:
+      - ../.env_development
+    volumes:
+      - ./redis_data:/data
+    restart: always
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+
+  server_api:
+    container_name: server_api
+    build:
+      context: ../api
+      dockerfile: docker/Dockerfile.development
+    env_file:
+      - ../.env_development
+    volumes:
+      - ./data:/data/db
+      - ../api/routes:/srv/express-mongo-redis/routes
+      - ../api/api.js:/srv/express-mongo-redis/api.js
+      - ../models:/srv/express-mongo-redis/models
+      - ../libs:/srv/express-mongo-redis/libs
+    restart: always
+    environment:
+      WAIT_HOSTS: server_mongo_database:27017
+    ports:
+      - "${API_PORT}:${API_PORT}"
